@@ -16,3 +16,11 @@ def test_create_repo(github_session):
 def test_update_repo(github_session):
     response = update_repo(github_session, 'test-teja')
     assert response.status_code == 200
+
+def test_update_repo(github_session):
+   response = update_repo(github_session, 'project-repo2')
+   assert response.status_code == 200
+
+def delete_update_repo(github_session):
+    response=delete_repo(github_session,'project-repo1')
+    assert response.status_code ==204
