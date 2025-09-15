@@ -5,7 +5,7 @@ import pytest
 
 def pytest_addoption(parser):
     parser.addoption("--url", default='https://api.github.com')
-    parser.addoption("--token", default="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")
+    parser.addoption("--token", default="None")
 
 
 @pytest.fixture(scope='session')
