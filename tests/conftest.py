@@ -1,7 +1,6 @@
 import os
 import requests
 import pytest
-from attr.converters import to_bool
 
 
 @pytest.fixture(scope='session')
