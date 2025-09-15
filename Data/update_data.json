@@ -1,3 +1,5 @@
 {
-  "update name":'test-Repo',
+  "name": "test-Rep",
+  "description": "Updated description",
+  "private": false
 }
