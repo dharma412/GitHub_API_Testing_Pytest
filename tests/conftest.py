@@ -2,20 +2,12 @@ import os
 import requests
 import pytest
 
-
-
-@pytest.fixture()
-def client():
-    return os.getenv("GITHUB_TOKEN")
-
-@pytest.fixture()
-def getheader(client):
-    return {"Authorization": f"token {client}"}
-
-@pytest.fixture()
-def github_session(getheader):
-    session=requests.Session()
-    session.headers.update(getheader)
-    session.base_url=os.getenv("BASE_URL")
+@pytest.fixture(scope='session')
+def github_session():
+    print("I am running")
+    header= {"Authorization": f"token {os.getenv('GITHUB_TOKEN')}"}
+    session = requests.Session()
+    session.headers.update(header)
+    session.base_url = os.getenv("BASE_URL")
     yield session
     session.close()
