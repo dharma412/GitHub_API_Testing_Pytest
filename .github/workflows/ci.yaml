@@ -23,7 +23,10 @@ jobs:
         pip install -r requirement.txt
 
     - name: Run pytest
+      env:
+        token: ${{ secrets.TOKEN }}
+        url  : ${{ secrets.URL }}
       run: |
         cd tests
         ls
-        pytest test_repositories.py
+        pytest --url=$url --token=$token test_repositories.py
