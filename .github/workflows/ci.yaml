@@ -25,4 +25,5 @@ jobs:
     - name: Run pytest
       run: |
         cd tests
+        ls
         pytest test_repositories.py
