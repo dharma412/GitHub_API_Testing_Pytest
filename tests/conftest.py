@@ -11,7 +11,7 @@ def pytest_addoption(parser):
 @pytest.fixture(scope='session')
 def github_session(request):
     print("I am running")
-    token = request.config.getoption("--token") or os.getenv("GITHUB_TOKEN")
+    token = request.config.getoption("--token")
     headers = {}
     if token:
         headers["Authorization"] = f"token {token}"
