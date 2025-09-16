@@ -29,6 +29,6 @@ def update_repo(github_session, old_repo, update_data=load_repo_data('../Data/up
     return response
 
 def delete_repo(github_session,delete_data=load_repo_data('../Data/delete_data.json')):
-    response = github_session.delete(f"{os.getenv('BASE_URL')}+/repos/os.getenv('USER_NAME')/{repo}")
+    response = github_session.delete(f"{os.getenv('BASE_URL')}+/repos/os.getenv('USER_NAME')/NewRepo")
     response=github_session.delete(url, json=delete_data,verify=False)
     return response

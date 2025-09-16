@@ -21,6 +21,6 @@ def test_update_repo(github_session):
    assert response.status_code == 200
 
 @pytest.mark.vm
-def delete_repo(github_session):
-    response = delete_repo(github_session,delete_repo='NewRepo')
+def test_delete_repo(github_session):
+    response = delete_repo(github_session,'NewRepo')
     assert response.status_code == 204
