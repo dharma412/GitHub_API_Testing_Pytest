@@ -7,7 +7,8 @@ import string
 
 def load_repo_data(filepath):
     with open(filepath) as f:
-        return json.load(f)
+        data = json.load(f)
+        return data
 
 # def save_repo(filepath,generate_repo_name):
 #     if os.path.exists(filepath):
@@ -58,7 +59,9 @@ def fetch_repo(github_session):
         print(response.text)
     return  response
 
-def create_repo(github_session, repo_data=load_repo_data('../Data/test_data.json')):
+def create_repo(github_session):
+    repo_data = load_repo_data('../Data/test_data.json')
+
     repo_data['name']=repo_data['name']+"".join((random.choice(string.ascii_letters + string.digits) for _ in range(6)))
     print(repo_data)
     response = github_session.post(os.getenv('BASE_URL')+'/user/repos', json=repo_data,verify=False)
