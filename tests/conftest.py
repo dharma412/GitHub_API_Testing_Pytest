@@ -20,3 +20,8 @@ def github_session(request):
     session.headers.update(headers)
     yield session
     session.close()
+
+
+@pytest.fixture(scope='function')
+def base_url(request):
+    return request.config.getoption("--url")
