@@ -9,7 +9,7 @@ def pytest_addoption(parser):
 
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def github_session(request):
     print("I am running")
     token = request.config.getoption("--token")

@@ -3,6 +3,7 @@ import os
 import json
 import random
 import string
+import time
 
 
 def get_data_path(filename):
@@ -30,35 +31,19 @@ def load_repo_data(filepath):
 #
 #
 
-def save_repo_name(file_path,random_string):
+def save_repo_name(file_path, random_string):
     """
-    Generate a 6-character alphanumeric repo name,
-    append it into 'repo_name' list in a JSON file,
-    and return the generated repo name.
-
-    If the file or key doesn't exist, it will create them.
+    Append a generated repo name to the 'repo_name' list in a JSON file.
+    Creates the file or key if they don't exist.
     """
-    # Generate random 6-character alphanumeric string
-
-
-    # Load existing JSON or start fresh
+    data = {}
     if os.path.exists(file_path):
-        with open(file_path, "r") as f:
-            try:
+        try:
+            with open(file_path, "r") as f:
                 data = json.load(f)
-            except json.JSONDecodeError:
-                data = {}
-    else:
-        data = {}
-
-    # Ensure repo_name is a list
-    if not isinstance(data.get("repo_name"), list):
-        data["repo_name"] = []
-
-    # Append new repo name (avoid duplicates if needed)
-    data["repo_name"].append(random_string)
-
-    # Save back to JSON
+        except json.JSONDecodeError:
+            pass
+    data.setdefault("repo_name", []).append(random_string)
     with open(file_path, "w") as f:
         json.dump(data, f, indent=4)
 
@@ -66,7 +51,7 @@ def save_repo_name(file_path,random_string):
 
 def fetch_repo(github_session, base_url):
     url = f"{base_url}/users/dharma412/repos"
-    response = github_session.get(url)
+    response = github_session.get(url,verify=False)
     if response.text:
         print(response.text)
     return response
@@ -82,21 +67,38 @@ def create_repo(github_session, base_url):
         save_repo_name('../Data/repo_data.json', repo_data['name'])
     return response
 
-def update_repo(github_session,base_url):
+def update_repo(github_session, base_url, max_retries=3, delay=5):
     update_data = load_repo_data(get_data_path('repo_data.json'))
-    old_repo=update_data.get('repo_name', [])[-1] if update_data.get('repo_name') else None
-    if not old_repo:
+    repo_names = update_data.get('repo_name', [])
+    if not repo_names:
         print("No repo_name found in repo_data.json")
         return None
-    new_repo=old_repo+random.choice(string.ascii_letters)
-    url = f"{base_url}/repos/dharma412/{old_repo}"
-    date1={'name':new_repo}
-    logging.error(new_repo)
-    logging.info({'name':new_repo})
-    response = github_session.patch(url, json=json.dumps({'name':new_repo}))
-    logging.error(response.text)
-    if response:
-        save_repo_name('../Data/repo_data.json',new_repo)
+    old_repo = repo_names[-1]
+    for attempt in range(max_retries):
+        new_repo = old_repo + random.choice(string.ascii_letters)
+        url = f"{base_url}/repos/dharma412/{old_repo}"
+        payload = {'name': new_repo}
+        print(f"[update_repo] Attempt {attempt+1}: old_repo='{old_repo}', new_repo='{new_repo}'")
+        print(f"[update_repo] PATCH URL: {url}")
+        print(f"[update_repo] Session headers: {github_session.headers}")
+        if not old_repo or not isinstance(old_repo, str):
+            print("[update_repo] ERROR: old_repo is empty or not a string!")
+            return None
+        logging.info(f"Updating repo: {old_repo} to {new_repo}")
+        response = github_session.patch(url, json=payload)
+        logging.error(response.text)
+        if response.status_code == 200:
+            save_repo_name('../Data/repo_data.json', new_repo)
+            return response
+        if response.status_code == 404:
+            print(f"[update_repo] ERROR: Got 404 Not Found. URL: {url}, repo: {old_repo}")
+        # Check for 422 and specific error message
+        if response.status_code == 422 and 'conflicting repository operation' in response.text:
+            print(f"GitHub 422 error: Conflicting operation in progress. Retrying in {delay} seconds...")
+            time.sleep(delay)
+        else:
+            break
+    print("Update failed after retries. Last response:", response.text)
     return response
 
 def delete_repo(github_session,base_url):
@@ -104,6 +106,15 @@ def delete_repo(github_session,base_url):
     repo_names = list_repos.get('repo_name', [])
     last_response = None
     for repo in repo_names:
-        last_response = github_session.delete(f"{base_url}/repos/dharma412/{repo}")
+        url = f"{base_url}/repos/dharma412/{repo}"
+        print(f"[delete_repo] DELETE URL: {url}")
+        print(f"[delete_repo] Deleting repo: {repo}")
+        print(f"[delete_repo] Session headers: {github_session.headers}")
+        if not repo or not isinstance(repo, str):
+            print("[delete_repo] ERROR: repo is empty or not a string!")
+            continue
+        last_response = github_session.delete(url)
         print(last_response.status_code)
+        if last_response.status_code == 404:
+            print(f"[delete_repo] ERROR: Got 404 Not Found. URL: {url}, repo: {repo}")
     return last_response
