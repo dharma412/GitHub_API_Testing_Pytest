@@ -101,20 +101,26 @@ def update_repo(github_session, base_url, max_retries=3, delay=5):
     print("Update failed after retries. Last response:", response.text)
     return response
 
-def delete_repo(github_session,base_url):
+
+def delete_repo(github_session, base_url):
     list_repos = load_repo_data(get_data_path('repo_data.json'))
     repo_names = list_repos.get('repo_name', [])
+    print(repo_names)
     last_response = None
     for repo in repo_names:
         url = f"{base_url}/repos/dharma412/{repo}"
-        print(f"[delete_repo] DELETE URL: {url}")
-        print(f"[delete_repo] Deleting repo: {repo}")
-        print(f"[delete_repo] Session headers: {github_session.headers}")
-        if not repo or not isinstance(repo, str):
-            print("[delete_repo] ERROR: repo is empty or not a string!")
-            continue
-        last_response = github_session.delete(url)
-        print(last_response.status_code)
-        if last_response.status_code == 404:
-            print(f"[delete_repo] ERROR: Got 404 Not Found. URL: {url}, repo: {repo}")
+        print(f"[delete_repo] Checking repo: {repo}")
+        print(f"[delete_repo] GET URL: {url}")
+        check_response = github_session.get(url, verify=False)
+        if check_response.status_code == 200:
+            print(f"[delete_repo] Repo {repo} exists. Deleting...")
+            print(f"[delete_repo] DELETE URL: {url}")
+            print(f"[delete_repo] Session headers: {github_session.headers}")
+            last_response = github_session.delete(url, verify=False)
+            print(last_response.status_code)
+            if last_response.status_code == 404:
+                print(f"[delete_repo] ERROR: Got 404 Not Found. URL: {url}, repo: {repo}")
+        else:
+            print(f"[delete_repo] Repo {repo} does not exist. Skipping.")
     return last_response
+
