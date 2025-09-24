@@ -74,12 +74,7 @@ def fetch_repo(github_session, base_url):
 def create_repo(github_session, base_url):
     repo_data = load_repo_data(get_data_path('test_data.json'))
     repo_data['name'] = repo_data['name'] + "".join((random.choice(string.ascii_letters + string.digits) for _ in range(6)))
-    print(repo_data)
-    print(base_url)
     url = f'{base_url}/user/repos'
-    # Check for token in session headers
-    if 'Authorization' not in github_session.headers:
-        print("WARNING: No GitHub token found in session headers. Repo creation will fail.")
     response = github_session.post(url, json=repo_data,verify=False)
     if response.status_code != 201:
         print(f"GitHub API error: {response.status_code} - {response.text}")
