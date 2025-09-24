@@ -59,7 +59,7 @@ def save_repo_name(file_path,random_string):
 
 def fetch_repo(github_session, base_url):
     url = f"{base_url}/users/dharma412/repos"
-    response = github_session.get(url)
+    response = github_session.get(url,verify=False)
     if response.text:
         print(response.text)
     return response
