@@ -5,10 +5,14 @@ import random
 import string
 
 
+def get_data_path(filename):
+    return os.path.join(os.path.dirname(__file__), '..', 'Data', filename)
+
 def load_repo_data(filepath):
     with open(filepath) as f:
         data = json.load(f)
         return data
+
 
 # def save_repo(filepath,generate_repo_name):
 #     if os.path.exists(filepath):
@@ -53,40 +57,40 @@ def save_repo_name(file_path,random_string):
 
 
 
-def fetch_repo(github_session):
-    response = github_session.get(github_session.base_url+'/users/dharma412/repos',verify=False)
+def fetch_repo(github_session, base_url):
+    url = f"{base_url}/users/dharma412/repos"
+    response = github_session.get(url)
     if response.text:
         print(response.text)
-    return  response
+    return response
 
-def create_repo(github_session):
-    repo_data = load_repo_data('../Data/test_data.json')
+def create_repo(github_session,base_url):
+    repo_data = load_repo_data(get_data_path('test_data.json'))
 
     repo_data['name']=repo_data['name']+"".join((random.choice(string.ascii_letters + string.digits) for _ in range(6)))
     print(repo_data)
-    response = github_session.post(os.getenv('BASE_URL')+'/user/repos', json=repo_data,verify=False)
+    response = github_session.post(base_url+'/user/repos', json=repo_data,verify=False)
     if response:
          (save_repo_name('../Data/repo_data.json',repo_data['name']))
     return response
 
-def update_repo(github_session, update_data=load_repo_data('../Data/repo_data.json')):
+def update_repo(github_session,base_url):
+    update_data = load_repo_data(get_data_path('repo_data.json'))
     old_repo=update_data['repo_name'][-1]
     new_repo=old_repo+random.choice(string.ascii_letters)
-    url = f"{os.getenv('BASE_URL')}/repos/dharma412/{old_repo}"
+    url = f"{base_url}/repos/dharma412/{old_repo}"
     date1={'name':new_repo}
-
     logging.error(new_repo)
     logging.info({'name':new_repo})
-    response = github_session.patch(url, json=json.dumps({'name':new_repo}),verify=False)
+    response = github_session.patch(url, json=json.dumps({'name':new_repo}))
     logging.error(response.text)
     if response:
         save_repo_name('../Data/repo_data.json',new_repo)
     return response
 
-def delete_repo(github_session):
-    list_repos =load_repo_data('../Data/repo_data.json')
+def delete_repo(github_session,base_url):
+    list_repos = load_repo_data(get_data_path('repo_data.json'))
     list_repos = list_repos['repo_name']
     for repo in list_repos:
-        url = f"{os.getenv('BASE_URL')}/repos/dharma412/{repo}"
-        response = github_session.delete(url, verify=False)
+        response = github_session.delete(f"{base_url}/repos/dharma412/{repo}")
         print(response.status_code)

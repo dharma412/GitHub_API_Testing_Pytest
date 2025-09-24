@@ -4,11 +4,12 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption("--url", default='https://api.github.com')
-    parser.addoption("--token", default="None")
+    parser.addoption("--url", default=os.getenv('BASE_URL', 'https://api.github.com'))
+    parser.addoption("--token", default=os.getenv('TOKEN', None))
 
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope='function')
 def github_session(request):
     print("I am running")
     token = request.config.getoption("--token")
@@ -17,6 +18,5 @@ def github_session(request):
         headers["Authorization"] = f"token {token}"
     session = requests.Session()
     session.headers.update(headers)
-    session.base_url = request.config.getoption("--url")
     yield session
     session.close()
