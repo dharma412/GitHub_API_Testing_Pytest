@@ -4,8 +4,8 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption("--url", default=os.getenv('BASE_URL', 'https://api.github.com'))
-    parser.addoption("--token", default=None)
+    parser.addoption("--url", default='None')
+    parser.addoption("--token", default="None")
 
 
 
