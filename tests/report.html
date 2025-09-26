@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <style>body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #E6E6E6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.log {
+  background-color: #e6e6e6;
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  height: 230px;
+  overflow-y: scroll;
+  padding: 5px;
+  white-space: pre-wrap;
+}
+.log:only-child {
+  height: inherit;
+}
+
+div.image {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.image img {
+  width: 320px;
+}
+
+div.video {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin-left: 5px;
+  overflow: hidden;
+  width: 320px;
+}
+div.video video {
+  overflow: hidden;
+  width: 320px;
+  height: 240px;
+}
+
+.collapsed {
+  display: none;
+}
+
+.expander::after {
+  content: " (show details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.collapser::after {
+  content: " (hide details)";
+  color: #BBB;
+  font-style: italic;
+  cursor: pointer;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+
+.sort-icon {
+  font-size: 0px;
+  float: left;
+  margin-right: 5px;
+  margin-top: 5px;
+  /*triangle*/
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+.inactive .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #E6E6E6;
+}
+.asc.active .sort-icon {
+  /*finish triangle*/
+  border-bottom: 8px solid #999;
+}
+.desc.active .sort-icon {
+  /*finish triangle*/
+  border-top: 8px solid #999;
+}
+</style></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report.html</h1>
+    <p>Report generated on 26-Sep-2025 at 21:28:04 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Summary</h2>
+    <p>4 tests ran in 1.47 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">0 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">4 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">tests/test_repositories.py::test_fetch_user_repo_data</td>
+          <td class="col-duration">0.48</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;urllib3.response.HTTPResponse object at 0x0000020C2AFD0190&gt;<br/><br/>    @contextmanager<br/>    def _error_catcher(self):<br/>        &quot;&quot;&quot;<br/>        Catch low-level python exceptions, instead re-raising urllib3<br/>        variants, so that low-level exceptions are not leaked in the<br/>        high-level api.<br/>    <br/>        On exit, release the connection back to the pool.<br/>        &quot;&quot;&quot;<br/>        clean_exit = False<br/>    <br/>        try:<br/>            try:<br/>&gt;               yield<br/><br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\response.py:444: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\response.py:567: in read<br/>    data = self._fp_read(amt) if not fp_closed else b&quot;&quot;<br/>           ^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\response.py:533: in _fp_read<br/>    return self._fp.read(amt) if amt is not None else self._fp.read()<br/>           ^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\http\client.py:479: in read<br/>    s = self.fp.read(amt)<br/>        ^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\socket.py:719: in readinto<br/>    return self._sock.recv_into(b)<br/>           ^^^^^^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\ssl.py:1304: in recv_into<br/>    return self.read(nbytes, buffer)<br/>           ^^^^^^^^^^^^^^^^^^^^^^^^^<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>self = &lt;ssl.SSLSocket [closed] fd=-1, family=2, type=1, proto=0&gt;, len = 8192, buffer = &lt;memory at 0x0000020C2AFC1480&gt;<br/><br/>    def read(self, len=1024, buffer=None):<br/>        &quot;&quot;&quot;Read up to LEN bytes and return them.<br/>        Return zero-length string on EOF.&quot;&quot;&quot;<br/>    <br/>        self._checkClosed()<br/>        if self._sslobj is None:<br/>            raise ValueError(&quot;Read on closed or unwrapped SSL socket.&quot;)<br/>        try:<br/>            if buffer is not None:<br/>&gt;               return self._sslobj.read(len, buffer)<br/>                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<br/><span class="error">E               FileNotFoundError: [Errno 2] No such file or directory</span><br/><br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\ssl.py:1138: FileNotFoundError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>    def generate():<br/>        # Special case for urllib3.<br/>        if hasattr(self.raw, &quot;stream&quot;):<br/>            try:<br/>&gt;               yield from self.raw.stream(chunk_size, decode_content=True)<br/><br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\models.py:816: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\response.py:628: in stream<br/>    data = self.read(amt=amt, decode_content=decode_content)<br/>           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\response.py:566: in read<br/>    with self._error_catcher():<br/>         ^^^^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\contextlib.py:162: in __exit__<br/>    self.gen.throw(value)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>self = &lt;urllib3.response.HTTPResponse object at 0x0000020C2AFD0190&gt;<br/><br/>    @contextmanager<br/>    def _error_catcher(self):<br/>        &quot;&quot;&quot;<br/>        Catch low-level python exceptions, instead re-raising urllib3<br/>        variants, so that low-level exceptions are not leaked in the<br/>        high-level api.<br/>    <br/>        On exit, release the connection back to the pool.<br/>        &quot;&quot;&quot;<br/>        clean_exit = False<br/>    <br/>        try:<br/>            try:<br/>                yield<br/>    <br/>            except SocketTimeout:<br/>                # FIXME: Ideally we&#x27;d like to include the url in the ReadTimeoutError but<br/>                # there is yet no clean way to get at it from this context.<br/>                raise ReadTimeoutError(self._pool, None, &quot;Read timed out.&quot;)<br/>    <br/>            except BaseSSLError as e:<br/>                # FIXME: Is there a better way to differentiate between SSLErrors?<br/>                if &quot;read operation timed out&quot; not in str(e):<br/>                    # SSL errors related to framing/MAC get wrapped and reraised here<br/>                    raise SSLError(e)<br/>    <br/>                raise ReadTimeoutError(self._pool, None, &quot;Read timed out.&quot;)<br/>    <br/>            except (HTTPException, SocketError) as e:<br/>                # This includes IncompleteRead.<br/>&gt;               raise ProtocolError(&quot;Connection broken: %r&quot; % e, e)<br/><span class="error">E               urllib3.exceptions.ProtocolError: (&quot;Connection broken: FileNotFoundError(2, &#x27;No such file or directory&#x27;)&quot;, FileNotFoundError(2, &#x27;No such file or directory&#x27;))</span><br/><br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\response.py:461: ProtocolError<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>github_session = &lt;requests.sessions.Session object at 0x0000020C2C6B4EC0&gt;, base_url = &#x27;https://api.github.com&#x27;, username = &#x27;dharma412&#x27;<br/><br/>    @pytest.mark.git<br/>    def test_fetch_user_repo_data(github_session, base_url,username):<br/>&gt;       response = fetch_repo(github_session, base_url,username)<br/>                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<br/><br/>test_repositories.py:7: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/>..\keywords\api_keywords.py:48: in fetch_repo<br/>    response = github_session.get(url,verify=False)<br/>               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py:602: in get<br/>    return self.request(&quot;GET&quot;, url, **kwargs)<br/>           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py:589: in request<br/>    resp = self.send(prep, **send_kwargs)<br/>           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py:747: in send<br/>    r.content<br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\models.py:899: in content<br/>    self._content = b&quot;&quot;.join(self.iter_content(CONTENT_CHUNK_SIZE)) or b&quot;&quot;<br/>                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ <br/><br/>    def generate():<br/>        # Special case for urllib3.<br/>        if hasattr(self.raw, &quot;stream&quot;):<br/>            try:<br/>                yield from self.raw.stream(chunk_size, decode_content=True)<br/>            except ProtocolError as e:<br/>&gt;               raise ChunkedEncodingError(e)<br/><span class="error">E               requests.exceptions.ChunkedEncodingError: (&quot;Connection broken: FileNotFoundError(2, &#x27;No such file or directory&#x27;)&quot;, FileNotFoundError(2, &#x27;No such file or directory&#x27;))</span><br/><br/>C:\Users\cteja\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\models.py:818: ChunkedEncodingError<br/> -----------------------------Captured stdout setup------------------------------ <br/>I am running
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">tests/test_repositories.py::test_create_repo</td>
+          <td class="col-duration">0.41</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">github_session = &lt;requests.sessions.Session object at 0x0000020C2C6B4EC0&gt;, base_url = &#x27;https://api.github.com&#x27;<br/><br/>    @pytest.mark.git2<br/>    def test_create_repo(github_session,base_url):<br/>        response = create_repo(github_session,base_url)<br/>        print(response.status_code)<br/>&gt;       assert response.status_code == 201<br/><span class="error">E       assert 401 == 201</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_repositories.py:14: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>401
+<br/> -------------------------------Captured log call-------------------------------- <br/>ERROR    keywords.api_keywords:api_keywords.py:61 GitHub API error: 401 - {
+  &quot;message&quot;: &quot;Bad credentials&quot;,
+  &quot;documentation_url&quot;: &quot;https://docs.github.com/rest&quot;,
+  &quot;status&quot;: &quot;401&quot;
+}<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">tests/test_repositories.py::test_update_repo</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">github_session = &lt;requests.sessions.Session object at 0x0000020C2C6B4EC0&gt;, base_url = &#x27;https://api.github.com&#x27;, username = &#x27;dharma412&#x27;<br/><br/>    @pytest.mark.git2<br/>    def test_update_repo(github_session,base_url,username):<br/>        response = update_repo(github_session,base_url,username)<br/>&gt;       assert response.status_code == 200<br/>               ^^^^^^^^^^^^^^^^^^^^<br/><span class="error">E       AttributeError: &#x27;NoneType&#x27; object has no attribute &#x27;status_code&#x27;</span><br/><br/>test_repositories.py:19: AttributeError<br/> -------------------------------Captured log call-------------------------------- <br/>ERROR    keywords.api_keywords:api_keywords.py:70 No repo_name found in repo_data.json<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">tests/test_repositories.py::test_delete_repo</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">github_session = &lt;requests.sessions.Session object at 0x0000020C2C6B4EC0&gt;, base_url = &#x27;https://api.github.com&#x27;, username = &#x27;dharma412&#x27;<br/><br/>    @pytest.mark.git2<br/>    def test_delete_repo(github_session,base_url,username):<br/>        response = delete_repo(github_session,base_url,username)<br/>&gt;       assert response.status_code==204<br/>               ^^^^^^^^^^^^^^^^^^^^<br/><span class="error">E       AttributeError: &#x27;NoneType&#x27; object has no attribute &#x27;status_code&#x27;</span><br/><br/>test_repositories.py:24: AttributeError<br/> ----------------------------Captured stdout teardown---------------------------- <br/>end of testcase
+<br/></div></td></tr></tbody></table></body></html>
