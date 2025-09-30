@@ -3,5 +3,9 @@ from  keywords.api_keywords import *
 
 
 def test_list_branches():
-    pass
+    print("I am branch")
+
+def test_new_branch():
+    print("I am new test")
+
 
