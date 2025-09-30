@@ -6,3 +6,4 @@ beautifulsoup4==4.12.2
 pytest
 pytest-html
 py
+pygments
