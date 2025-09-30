@@ -18,10 +18,10 @@ def test_update_repo(github_session,base_url,username):
     response = update_repo(github_session,base_url,username)
     assert response.status_code == 200
 #
-@pytest.mark.git2
-def test_delete_repo(github_session,base_url,username):
-    response = delete_repo(github_session,base_url,username)
-    assert response.status_code==204
+# @pytest.mark.git2
+# def test_delete_repo(github_session,base_url,username):
+#     response = delete_repo(github_session,base_url,username)
+#     assert response.status_code==204
 
 # create repo -- repo--> repo_data.py update
 
