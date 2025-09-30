@@ -8,4 +8,5 @@ def test_list_branches():
 def test_new_branch():
     print("I am new test")
 
-
+def test_third_testcase()
+    print("I am third testcase")
