@@ -7,8 +7,11 @@ from pygments.lexer import default
 def pytest_addoption(parser):
     parser.addoption("--url", default=os.getenv('BASE_URL', 'https://api.github.com'))
     parser.addoption("--token", default=None)
-    parser.addoption("--username",default=None)
-    parser.addoption("--user_name", default="dharma412")
+    parser.addoption("--username", default=None)
+    parser.addoption("--repo",default="GitHub_API_Testing_Pytest")
+    parser.addoption("--branch_name",default=None)
+    parser.addoption("--new_name",default=None)
+
 
 @pytest.fixture(scope='session')
 def github_session(request):
@@ -29,9 +32,21 @@ def clear_repo_data():
         json.dump({"repo_name": []}, f)
 
 @pytest.fixture(scope='session')
-def base_url(request):
+def send_base_url(request):
     return request.config.getoption("--url")
 
 @pytest.fixture(scope='session')
-def username(request):
-    return request.config.getoption("--user_name")
+def send_username(request):
+    return request.config.getoption("--username")
+
+@pytest.fixture(scope='session')
+def send_repo(request):
+    return request.config.getoption("--repo")
+
+@pytest.fixture(scope='session')
+def send_branch_name(request):
+    return request.config.getoption("--branch_name")
+
+@pytest.fixture(scope='session')
+def send_new_name(request):
+    return request.config.getoption("--new_name")
