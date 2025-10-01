@@ -4,8 +4,11 @@ on:
   push:
     branches: qa-teja
 
+  pull_request:
+    branches:
+      - master
 jobs:
-  test:
+  tetingpytest:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,11 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirement.txt
 
-    - name: Run pytest
-      env:
-        token: ${{ secrets.TOKEN }}
-        url  : ${{ secrets.URL }}
+    - name: Run tests
       run: |
         cd tests
-        ls
-        pytest --url=$url --token=$token test_repositories.py
+        pytest --token=${{ secrets.TOKEN }}
