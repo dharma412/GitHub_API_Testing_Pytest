@@ -6,7 +6,7 @@ from tests.conftest import send_branch_name
 owner="dharma412"
 repo="GitHub_API_Testing_Pytest"
 branch_name="qa-manju"
-new_name="dummy"
+new_name="QA-MANJU"
 
 @pytest.mark.git
 def test_list_branches(send_username, send_base_url,send_repo):
