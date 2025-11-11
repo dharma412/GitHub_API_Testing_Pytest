@@ -7,10 +7,10 @@ from pygments.lexer import default
 def pytest_addoption(parser):
     parser.addoption("--url", default=os.getenv('BASE_URL', 'https://api.github.com'))
     parser.addoption("--token", default=None)
-    parser.addoption("--username", default=None)
+    parser.addoption("--username", default="dharma412")
     parser.addoption("--repo",default="GitHub_API_Testing_Pytest")
-    parser.addoption("--branch_name",default=None)
-    parser.addoption("--new_name",default=None)
+    parser.addoption("--branch_name",default="qa-manju")
+    parser.addoption("--new_name",default="qa-newmanju")
 
 
 @pytest.fixture(scope='session')
