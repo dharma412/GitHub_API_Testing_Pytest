@@ -42,20 +42,20 @@ def save_repo_name(file_path, random_string):
         json.dump(data, f, indent=4)
 
 
-def fetch_repo(github_session, base_url,username):
-    url = f"{base_url}/users/{username}/repos"
+def fetch_repo(github_session, github_base_url,github_username):
+    url = f"{github_base_url}/users/{github_username}/repos"
     logger.info(f"Fetching repos from URL: {url}")
     response = github_session.get(url,verify=False)
     if response.text:
         logger.debug(response.text)
     return response
 
-def create_repo(github_session, base_url):
+def create_repo(github_session, github_base_url):
     repo_data = load_repo_data(get_data_path('test_data.json'))
     logger.info(f"Original repo name: {repo_data['name']}")
     repo_data['name'] = repo_data['name'] + "".join((random.choice(string.ascii_letters + string.digits) for _ in range(6)))
 
-    url = f'{base_url}/user/repos'
+    url = f'{github_base_url}/user/repos'
     response = github_session.post(url, json=repo_data,verify=False)
     if response.status_code != 201:
         logger.error(f"GitHub API error: {response.status_code} - {response.text}")
@@ -63,7 +63,7 @@ def create_repo(github_session, base_url):
         save_repo_name('../Data/repo_data.json', repo_data['name'])
     return response
 
-def update_repo(github_session, base_url,username, max_retries=3, delay=5):
+def update_repo(github_session, send_base_url,username, max_retries=3, delay=5):
     update_data = load_repo_data(get_data_path('repo_data.json'))
     repo_names = update_data.get('repo_name', [])
     if not repo_names:
@@ -72,7 +72,7 @@ def update_repo(github_session, base_url,username, max_retries=3, delay=5):
     old_repo = repo_names[-1]
     for attempt in range(max_retries):
         new_repo = old_repo + random.choice(string.ascii_letters)
-        url = f"{base_url}/repos/{username}/{old_repo}"
+        url = f"{send_base_url}/repos/{username}/{old_repo}"
         payload = {'name': new_repo}
 
         logger.info(f"[update_repo] Attempt {attempt+1}: old_repo='{old_repo}', new_repo='{new_repo}'")
@@ -99,13 +99,13 @@ def update_repo(github_session, base_url,username, max_retries=3, delay=5):
     return response
 
 
-def delete_repo(github_session, base_url,username):
+def delete_repo(github_session, send_base_url,username):
     list_repos = load_repo_data(get_data_path('repo_data.json'))
     repo_names = list_repos.get('repo_name', [])
     logger.info(f"Repos to delete: {repo_names}")
     last_response = None
     for repo in repo_names:
-        url = f"{base_url}/repos/{username}/{repo}"
+        url = f"{send_base_url}/repos/{username}/{repo}"
         logger.info(f"[delete_repo] Checking repo: {repo}")
 
         check_response = github_session.get(url, verify=False)

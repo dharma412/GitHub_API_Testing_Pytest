@@ -3,17 +3,20 @@ import requests
 import pytest
 import json
 from pygments.lexer import default
+from .logging_decorator import log_call
+
 
 def pytest_addoption(parser):
     parser.addoption("--url", default=os.getenv('BASE_URL', 'https://api.github.com'))
     parser.addoption("--token", default=None)
     parser.addoption("--username", default="dharma412")
-    parser.addoption("--repo",default="GitHub_API_Testing_Pytest")
-    parser.addoption("--branch_name",default="qa-manju")
-    parser.addoption("--new_name",default="qa-newmanju")
+    parser.addoption("--repo", default="GitHub_API_Testing_Pytest")
+    parser.addoption("--branch_name", default="qa-manju")
+    parser.addoption("--new_name", default="qa-newmanju")
 
 
 @pytest.fixture(scope='session')
+@log_call()
 def github_session(request):
     print("I am running")
     token = request.config.getoption("--token")
@@ -27,25 +30,31 @@ def github_session(request):
     session.close()
     clear_repo_data()
 
+
 def clear_repo_data():
     with open('../Data/repo_data.json', 'w') as f:
         json.dump({"repo_name": []}, f)
 
-@pytest.fixture(scope='session')
-def send_base_url(request):
-    return request.config.getoption("--url")
 
 @pytest.fixture(scope='session')
-def send_username(request):
+def github_base_url(request):
+    return request.config.getoption("--url")
+
+
+@pytest.fixture(scope='session')
+def github_username(request):
     return request.config.getoption("--username")
+
 
 @pytest.fixture(scope='session')
 def send_repo(request):
     return request.config.getoption("--repo")
 
+
 @pytest.fixture(scope='session')
 def send_branch_name(request):
     return request.config.getoption("--branch_name")
+
 
 @pytest.fixture(scope='session')
 def send_new_name(request):
