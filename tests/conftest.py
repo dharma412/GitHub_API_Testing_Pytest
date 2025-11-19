@@ -2,8 +2,6 @@ import os
 import requests
 import pytest
 import json
-from pygments.lexer import default
-from .logging_decorator import log_call
 
 
 def pytest_addoption(parser):
@@ -16,7 +14,6 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope='session')
-@log_call()
 def github_session(request):
     print("I am running")
     token = request.config.getoption("--token")
@@ -32,7 +29,8 @@ def github_session(request):
 
 
 def clear_repo_data():
-    with open('../Data/repo_data.json', 'w') as f:
+
+    with open('Data/repo_data.json', 'w') as f:
         json.dump({"repo_name": []}, f)
 
 
