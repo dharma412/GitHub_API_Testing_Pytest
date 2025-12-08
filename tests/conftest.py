@@ -2,6 +2,7 @@ import os
 import requests
 import pytest
 import json
+from Utils.logger_config import setup_logger
 
 
 def pytest_addoption(parser):
@@ -57,3 +58,6 @@ def send_branch_name(request):
 @pytest.fixture(scope='session')
 def send_new_name(request):
     return request.config.getoption("--new_name")
+
+def pytest_configure(config):
+    setup_logger()  # initializes global logging once
