@@ -120,3 +120,11 @@ def delete_repo(github_session, base_url,username):
         else:
             logger.warning(f"[delete_repo] Repo {repo} does not exist. Skipping.")
     return last_response
+
+
+def create_empty_commit(github_session,base_url,username):
+    repo_data = load_repo_data(get_data_path('test_data.json'))
+    check_response = github_session.put(f"{base_url}/repos/{username}/test-repo/contents/README.md",json=repo_data, verify=False)
+    return check_response
+    assert check_response.status_code == 201
+

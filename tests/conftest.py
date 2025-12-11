@@ -11,7 +11,7 @@ def pytest_addoption(parser):
     parser.addoption("--token", default=None)
     parser.addoption("--user_name", default="dharma412")
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def github_session(request):
     print("I am running")
     token = request.config.getoption("--token")
