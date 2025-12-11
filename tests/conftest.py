@@ -12,6 +12,10 @@ def pytest_addoption(parser):
     parser.addoption("--user_name", default="dharma412")
 
 @pytest.fixture(scope='module')
+def context():
+    return {}
+
+@pytest.fixture(scope='module')
 def github_session(request):
     print("I am running")
     token = request.config.getoption("--token")
@@ -26,7 +30,7 @@ def github_session(request):
     clear_repo_data()
 
 def clear_repo_data():
-    with open('../Data/repo_data.json', 'w') as f:
+    with open('Data/repo_data.json', 'w') as f:
         json.dump({"repo_name": []}, f)
 
 @pytest.fixture(scope='session')

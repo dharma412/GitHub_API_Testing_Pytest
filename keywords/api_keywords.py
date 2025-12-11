@@ -50,17 +50,17 @@ def fetch_repo(github_session, base_url,username):
         logger.debug(response.text)
     return response
 
-def create_repo(github_session, base_url):
+def create_repo(github_session, base_url,context):
     repo_data = load_repo_data(get_data_path('test_data.json'))
     logger.info(f"Original repo name: {repo_data['name']}")
     repo_data['name'] = repo_data['name'] + "".join((random.choice(string.ascii_letters + string.digits) for _ in range(6)))
-
+    context['repo_name']=repo_data['name']
     url = f'{base_url}/user/repos'
     response = github_session.post(url, json=repo_data,verify=False)
     if response.status_code != 201:
         logger.error(f"GitHub API error: {response.status_code} - {response.text}")
     if response.status_code == 201:
-        save_repo_name('../Data/repo_data.json', repo_data['name'])
+        save_repo_name('Data/repo_data.json', repo_data['name'])
     return response
 
 def update_repo(github_session, base_url,username, max_retries=3, delay=5):
@@ -122,9 +122,9 @@ def delete_repo(github_session, base_url,username):
     return last_response
 
 
-def create_empty_commit(github_session,base_url,username):
-    repo_data = load_repo_data(get_data_path('test_data.json'))
-    check_response = github_session.put(f"{base_url}/repos/{username}/test-repo/contents/README.md",json=repo_data, verify=False)
+def create_empty_commit(github_session,base_url,username,context):
+    repo_data = load_repo_data(get_data_path('commit_data.json'))
+    check_response = github_session.put(f"{base_url}/repos/{username}/{context['repo_name']}/contents/README1.md",json=repo_data, verify=False)
     return check_response
     assert check_response.status_code == 201
 
