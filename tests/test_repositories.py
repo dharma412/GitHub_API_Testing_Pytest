@@ -4,8 +4,8 @@ from  keywords.api_keywords import *
 #this
 @pytest.mark.sample
 def test_fetch_user_repo_data(github_session, base_url,username):
-    response = fetch_repo(github_session, base_url,username)
-    assert response.status_code==200
+    result = fetch_repo(github_session, base_url,username)
+    assert result.status_code==200
 
 @pytest.mark.e2e
 @pytest.mark.dependency(name="create_repo")
@@ -19,6 +19,12 @@ def test_create_repo(github_session,base_url,context):
 def test_commit_on_repo(github_session,base_url,username,context):
     responses= create_empty_commit(github_session,base_url,username,context)
     assert responses.status_code == 201
+
+
+    # create branch - automation from main
+
+    # push code to automation
+
 
 
 @pytest.mark.git2

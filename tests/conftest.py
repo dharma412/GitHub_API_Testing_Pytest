@@ -9,7 +9,7 @@ from pygments.lexer import default
 def pytest_addoption(parser):
     parser.addoption("--url", default=os.getenv('BASE_URL', 'https://api.github.com'))
     parser.addoption("--token", default=None)
-    parser.addoption("--user_name", default="dharma412")
+    parser.addoption("--username", default="dharma412")
 
 @pytest.fixture(scope='module')
 def context():
@@ -19,11 +19,11 @@ def context():
 def github_session(request):
     print("I am running")
     token = request.config.getoption("--token")
-    headers = {}
+    myheader = {}
     if token:
-        headers["Authorization"] = f"token {token}"
+        myheader["Authorization"] = f"Bearer {token}"
     session = requests.Session()
-    session.headers.update(headers)
+    session.headers.update(myheader)
     yield session
     print("end of testcase")
     session.close()
@@ -39,4 +39,4 @@ def base_url(request):
 
 @pytest.fixture(scope='session')
 def username(request):
-    return request.config.getoption("--user_name")
+    return request.config.getoption("--username")
