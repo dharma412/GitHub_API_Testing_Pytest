@@ -85,7 +85,7 @@ def update_repo(github_session, base_url,username, max_retries=3, delay=5):
         response = github_session.patch(url, json=payload,verify=False)
         logger.error(response.text)
         if response.status_code == 200:
-            save_repo_name('../Data/repo_data.json', new_repo)
+            save_repo_name('Data/repo_data.json', new_repo)
             return response
         if response.status_code == 404:
             logger.error(f"[update_repo] ERROR: Got 404 Not Found. URL: {url}, repo: {old_repo}")
