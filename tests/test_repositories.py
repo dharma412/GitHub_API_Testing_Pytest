@@ -1,24 +1,36 @@
 import pytest
 from  keywords.api_keywords import *
-from Utils.test_util import test_logger
 
 #this
-@pytest.mark.git
-@test_logger
-def test_fetch_user_repo_data(github_session, github_base_url,github_username):
-    response = fetch_repo(github_session, github_base_url,github_username)
-    assert response.status_code==200
+@pytest.mark.sample
+def test_fetch_user_repo_data(github_session, base_url,username):
+    result = fetch_repo(github_session, base_url,username)
+    assert result.status_code==200
 
-@pytest.mark.git2
-@test_logger
-def test_create_repo(github_session,github_base_url):
-    response = create_repo(github_session,github_base_url)
+@pytest.mark.e2e
+@pytest.mark.createrepo
+@pytest.mark.dependency(name="create_repo")
+def test_create_repo(github_session,base_url,context):
+    response = create_repo(github_session,base_url,context)
     print(response.status_code)
     assert response.status_code == 201
 
+@pytest.mark.e2e
+@pytest.mark.dependency(depends=["create_repo"])
+def test_commit_on_repo(github_session,base_url,username,context):
+    responses= create_empty_commit(github_session,base_url,username,context)
+    assert responses.status_code == 201
+
+
+    # create branch - automation from main
+
+    # push code to automation
+
+
+
 @pytest.mark.git2
-def test_update_repo(github_session,github_base_url,github_username):
-    response = update_repo(github_session,github_base_url,github_username)
+def test_update_repo(github_session,base_url,username):
+    response = update_repo(github_session,base_url,username)
     assert response.status_code == 200
 #
 # @pytest.mark.git2
