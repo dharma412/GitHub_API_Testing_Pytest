@@ -126,5 +126,9 @@ def create_empty_commit(github_session,base_url,username,context):
     repo_data = load_repo_data(get_data_path('commit_data.json'))
     check_response = github_session.put(f"{base_url}/repos/{username}/{context['repo_name']}/contents/README1.md",json=repo_data, verify=False)
     return check_response
-    assert check_response.status_code == 201
+
+def create_branch(github_session):
+    pass
+    # get sha  get_sha()
+    # use this sha to create branch. create_branch()
 
