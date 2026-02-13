@@ -8,7 +8,6 @@ def test_fetch_user_repo_data(github_session, base_url,username):
 
 @pytest.mark.e2e
 @pytest.mark.repo
-@pytest.mark.dependency(name="create_repo")
 def test_create_repo(github_session,base_url,context):
     response = create_repo(github_session,base_url,context)
     print(response.status_code)
