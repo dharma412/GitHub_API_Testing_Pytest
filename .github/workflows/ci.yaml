@@ -1,14 +1,11 @@
-name: Running Pytest testcases
+name: Running Pytest testcasesggg
 
 on:
-  push:
-    branches: qa-teja
-
   pull_request:
     branches:
       - master
 jobs:
-  tetingpytest:
+  Pytest_Execution:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,5 +24,4 @@ jobs:
 
     - name: Run tests
       run: |
-        cd tests
-        pytest --token=${{ secrets.TOKEN }}
+        pytest -m repo --token=${{ secrets.TOKEN }}

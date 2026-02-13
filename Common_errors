@@ -1,0 +1,6 @@
+1. unable to find the file specified.
+
+# when we run "pytest" command for testcase execution.
+#current working directory = project root, not the tests/ folder.
+
+so use relative path from project root. for accesing files in tests/ folder.
