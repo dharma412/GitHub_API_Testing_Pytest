@@ -30,7 +30,7 @@ def github_session(request):
     clear_repo_data()
 
 def clear_repo_data():
-    with open('Data/repo_data.json', 'w') as f:
+    with open('../Data/repo_data.json', 'w') as f:
         json.dump({"repo_name": []}, f)
 
 @pytest.fixture(scope='session')
