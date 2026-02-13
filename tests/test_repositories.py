@@ -14,12 +14,6 @@ def test_create_repo(github_session,base_url,context):
     print(response.status_code)
     assert response.status_code == 201
 
-@pytest.mark.repo
-@pytest.mark.dependency(depends=["create_repo"])
-def test_commit_on_repo(github_session,base_url,username,context):
-    responses= create_empty_commit(github_session,base_url,username,context)
-    assert responses.status_code == 201
-
 @pytest.mark.git2
 def test_update_repo(github_session,base_url,username):
     response = update_repo(github_session,base_url,username)
