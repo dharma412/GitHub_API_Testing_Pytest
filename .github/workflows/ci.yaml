@@ -28,4 +28,4 @@ jobs:
     - name: Run tests
       run: |
         cd tests
-        pytest --token=${{ secrets.TOKEN }}
+        pytest -m repo --token=${{ secrets.TOKEN }}
