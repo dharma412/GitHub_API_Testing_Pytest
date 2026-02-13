@@ -1,4 +1,4 @@
-name: Running Pytest testcasesrtrt
+name: Running Pytest testcases
 
 on:
   push:
