@@ -14,5 +14,8 @@ def test_commit_on_repo(github_session,base_url,username,context):
     assert responses.status_code == 201
 
 @pytest.mark.branch
-def create_branch(github_session,base_url):
+def get_sha(github_session,base_url):
+    pass
+
+def create_branch(github_session,base_url,username,context):
     pass

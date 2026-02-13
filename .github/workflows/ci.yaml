@@ -1,9 +1,6 @@
 name: Running Pytest testcasesggg
 
 on:
-  push:
-    branches: qa-teja
-
   pull_request:
     branches:
       - master
