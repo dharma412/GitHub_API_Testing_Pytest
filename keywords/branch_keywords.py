@@ -1,6 +1,9 @@
 import os
 import requests
 
+from tests.conftest import base_url
+
+
 # GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 #
 # HEADERS = {
@@ -36,7 +39,12 @@ def get_sha_id(github_session,base_url,username,context):
         context['sha']=(check_response.json().get("object", {}).get("sha"))
     return context['sha']
 
-def create_branch(github_session):
-    pass
+def create_branch(github_session,base_url,username,context):
+    brach_data= {
+        "ref": "refs/heads/qa-teja",
+        "sha": context['sha']
+    }
+    check_respose=github_session.post(f"{base_url}/repos/{username}/{context['repo_name']}/git/refs",json=brach_data, verify=False)
+    return check_respose
     # get sha  get_sha()
     # use this sha to create branch. create_branch()

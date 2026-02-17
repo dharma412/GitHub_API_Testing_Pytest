@@ -1,5 +1,5 @@
 import pytest
-from  keywords.api_keywords import *
+from  keywords.repo_keywords import *
 
 #Repo testcase
 
