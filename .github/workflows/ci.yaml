@@ -24,4 +24,4 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -m repo --token=${{ secrets.TOKEN }}
+        pytest -m branch --token=${{ secrets.TOKEN }}
