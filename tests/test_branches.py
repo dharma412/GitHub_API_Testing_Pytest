@@ -1,5 +1,7 @@
 import pytest
-from keywords.api_keywords import create_repo, create_empty_commit
+from keywords.repo_keywords import  *
+from keywords.repo_keywords import create_repo, create_empty_commit
+from keywords.branch_keywords import *
 
 
 @pytest.mark.branch
@@ -14,8 +16,11 @@ def test_commit_on_repo(github_session,base_url,username,context):
     assert responses.status_code == 201
 
 @pytest.mark.branch
-def get_sha(github_session,base_url):
-    pass
+def test_get_sha_id(github_session,base_url,username,context):
+    responses = get_sha_id(github_session,base_url,username,context)
+    print(responses)
 
-def create_branch(github_session,base_url,username,context):
-    pass
+@pytest.mark.branch
+def test_create_branch(github_session,base_url,username,context):
+    responses= create_branch(github_session,base_url,username,context)
+    assert responses.status_code == 201
