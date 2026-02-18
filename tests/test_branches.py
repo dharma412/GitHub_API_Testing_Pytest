@@ -1,9 +1,11 @@
+import allure
 import pytest
 from keywords.repo_keywords import  *
 from keywords.repo_keywords import create_repo, create_empty_commit
 from keywords.branch_keywords import *
+import allure_pytest
 
-
+@allure.title("Testing branches")
 @pytest.mark.branch
 def test_create_repo(github_session,base_url,context):
     response = create_repo(github_session,base_url,context)
